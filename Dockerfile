@@ -11,7 +11,7 @@ RUN mvn clean package
 FROM openjdk:11.0.7-jdk-slim
 
 # copy only the artifacts we need from the first stage and discard the rest
-COPY --from=MAVEN_BUILD /target/demodocker-0.0.1-SNAPSHOT.jar /demo.jar
+COPY --from=MAVEN_BUILD /target/rest-service-0.0.1-SNAPSHOT.jar /demo.jar
 
 # set the startup command to execute the jar
 CMD ["java", "-jar", "/demo.jar"]
