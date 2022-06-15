@@ -1,17 +1,21 @@
-# the first stage of our build will use a maven 3.6.3 parent image
-FROM maven:3.6.3-jdk-11 AS MAVEN_BUILD
+# Docker Build Stage
+FROM maven:3.6.3-jdk-11 AS build
 
-# copy the pom and src code to the container
-COPY ./ ./
 
-# package our application code
-RUN mvn clean package
+# Build Stage
+WORKDIR /opt/app
 
-# the second stage of our build will use open jdk 11 on alpine 3.9
+COPY ./ /opt/app
+RUN mvn clean install -DskipTests
+
+
+# Docker Build Stage
 FROM openjdk:11.0.7-jdk-slim
 
-# copy only the artifacts we need from the first stage and discard the rest
-COPY --from=MAVEN_BUILD /target/rest-service-0.0.1-SNAPSHOT.jar /demo.jar
+COPY --from=build /opt/app/target/*.jar app.jar
 
-# set the startup command to execute the jar
-CMD ["java", "-jar", "/demo.jar"]
+ENV PORT 8080
+EXPOSE $PORT
+
+ENTRYPOINT ["java","-jar","-Xmx1024M","-Dserver.port=${PORT}","app.jar"]
+
